@@ -22,81 +22,87 @@
 </head>
 <body>
     <script>
-        let targetTime;
-        let duration;
-        let startTime;
         let dots = [];
+        const totalMinutes = 510;  // 8:00 AM to 4:30 PM is 510 minutes
+        let startTime;
+        let lastTimeChecked;
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
-            calculateCountdown();
+            initializeDots();
+            startTime = millis();
+            lastTimeChecked = getElapsedMinutes();
         }
 
         function draw() {
             background(0);
 
-            let elapsed = (millis() - startTime) / 1000;
-            let remainingTime = duration - elapsed;
-
-            // If the countdown reaches 0, recalculate for the next 4:30 PM
-            if (remainingTime <= 0) {
-                calculateCountdown();
-                remainingTime = duration;
+            let currentMinute = getElapsedMinutes();
+            
+            // If a minute has passed, remove a dot
+            if (currentMinute > lastTimeChecked) {
+                lastTimeChecked = currentMinute;
+                removeDot();
             }
 
-            // Add a new dot every second
-            if (remainingTime > 0 && frameCount % 60 === 0) {
-                dots.push(new Dot(random(width), random(height)));  // Add a new dot at a random position
+            // Display the dots
+            for (let dot of dots) {
+                dot.display();
             }
 
-            // Update and display all dots
-            for (let i = dots.length - 1; i >= 0; i--) {
-                dots[i].update();
-                dots[i].display();
-                if (dots[i].alpha <= 0) {
-                    dots.splice(i, 1);  // Remove the dot when it's fully faded
-                }
-            }
-
-            // Display the countdown timer in the center
+            // Display the remaining time to 4:30 PM
+            let remainingTime = totalMinutes - currentMinute;
             textSize(48);
             fill(255);
             textAlign(CENTER, CENTER);
-            text(nf(floor(remainingTime), 2), width / 2, height / 2); // Show remaining time
+            text(nf(remainingTime, 3), width / 2, height / 2);
         }
 
-        // Dot class for creating dots that fade over time
+        // Calculate how many minutes have passed since 8:00 AM
+        function getElapsedMinutes() {
+            let now = new Date();
+            let startOfDay = new Date(now);
+            startOfDay.setHours(8, 0, 0, 0);  // Set time to 8:00 AM today
+
+            let elapsedMillis = now - startOfDay;  // Elapsed time in milliseconds
+            return Math.floor(elapsedMillis / 60000);  // Convert to minutes
+        }
+
+        // Initialize the dots array, one dot per minute
+        function initializeDots() {
+            let cols = Math.floor(width / 30);
+            let rows = Math.floor(height / 30);
+            let totalDots = cols * rows;
+
+            for (let i = 0; i < totalDots; i++) {
+                let x = (i % cols) * 30 + 15;
+                let y = Math.floor(i / cols) * 30 + 15;
+                dots.push(new Dot(x, y));
+            }
+        }
+
+        // Remove one dot every minute
+        function removeDot() {
+            if (dots.length > 0) {
+                dots.shift();  // Remove the first dot from the array
+            }
+        }
+
+        // Dot class to create and display dots
         class Dot {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.alpha = 255;  // Full opacity at the start
-            }
-
-            update() {
-                this.alpha -= 255 / (duration / 60);  // Gradually fade the dot over time
+                this.size = 20;
             }
 
             display() {
                 noStroke();
-                fill(255, this.alpha);  // White color with fading opacity
-                ellipse(this.x, this.y, 20, 20);  // Draw the dot
+                fill(255);
+                ellipse(this.x, this.y, this.size, this.size);
             }
-        }
-
-        // Function to calculate the remaining time until 4:30 PM
-        function calculateCountdown() {
-            let now = new Date();
-            targetTime = new Date(now);
-            targetTime.setHours(16, 30, 0, 0); // Set target time to 4:30 PM today
-
-            if (now > targetTime) {
-                targetTime.setDate(now.getDate() + 1); // If it's after 4:30 PM, set target to tomorrow
-            }
-
-            duration = (targetTime - now) / 1000; // Duration in seconds
-            startTime = millis();
         }
     </script>
 </body>
 </html>
+
