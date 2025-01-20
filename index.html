@@ -24,8 +24,9 @@
     <script>
         let dots = [];
         const totalMinutes = 510;  // 8:00 AM to 4:30 PM is 510 minutes
-        let startTime;
-        let lastTimeChecked;
+        const startHour = 8;
+        const endHour = 16;  // 4:30 PM
+        const endMinute = 30;
         const letterCoordinates = {
             R: [
                 {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 3},
@@ -48,8 +49,7 @@
         function setup() {
             createCanvas(windowWidth, windowHeight);
             allCoordinates = generateCoordinates();
-            startTime = millis();
-            lastTimeChecked = getElapsedMinutes();
+            frameRate(60);  // Make sure the drawing updates 60 times per second
         }
 
         function draw() {
@@ -58,9 +58,8 @@
             let currentMinute = getElapsedMinutes();
             
             // If a minute has passed, add a new dot
-            if (currentMinute > lastTimeChecked) {
-                lastTimeChecked = currentMinute;
-                addDot();
+            if (currentMinute <= totalMinutes) {
+                addDot(currentMinute);
             }
 
             // Display all dots
@@ -73,7 +72,7 @@
         function getElapsedMinutes() {
             let now = new Date();
             let startOfDay = new Date(now);
-            startOfDay.setHours(8, 0, 0, 0);  // Set time to 8:00 AM today
+            startOfDay.setHours(startHour, 0, 0, 0);  // Set time to 8:00 AM today
 
             let elapsedMillis = now - startOfDay;  // Elapsed time in milliseconds
             return Math.floor(elapsedMillis / 60000);  // Convert to minutes
@@ -104,9 +103,9 @@
             return coords;
         }
 
-        // Add a new dot according to the coordinates
-        function addDot() {
-            if (dots.length < allCoordinates.length) {
+        // Add a new dot according to the current minute
+        function addDot(currentMinute) {
+            if (dots.length < currentMinute) {
                 let newDot = new Dot(allCoordinates[dots.length].x, allCoordinates[dots.length].y);
                 dots.push(newDot);
             }
