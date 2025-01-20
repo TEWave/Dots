@@ -10,7 +10,7 @@
     
     <style>
         body {
-            background-color: black;
+            background-color: white;
             margin: 0;
             overflow: hidden;
             display: flex;
@@ -26,6 +26,8 @@
         const totalMinutes = 510;  // 8:00 AM to 4:30 PM is 510 minutes
         let startTime;
         let lastTimeChecked;
+        let nextDotToDisappear = 0;  // Index of the next dot to disappear
+        let flashingDotIndex = -1;  // Track which dot is currently flashing
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
@@ -35,27 +37,20 @@
         }
 
         function draw() {
-            background(0);
+            background(255);  // Set background to white
 
             let currentMinute = getElapsedMinutes();
             
-            // If a minute has passed, remove a dot
+            // If a minute has passed, remove a dot and handle flashing
             if (currentMinute > lastTimeChecked) {
                 lastTimeChecked = currentMinute;
-                removeDot();
+                handleDotDisappearance();
             }
 
-            // Display the dots
-            for (let dot of dots) {
-                dot.display();
+            // Display all dots
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].display(i);
             }
-
-            // Display the remaining time to 4:30 PM
-            let remainingTime = totalMinutes - currentMinute;
-            textSize(48);
-            fill(255);
-            textAlign(CENTER, CENTER);
-            text(nf(remainingTime, 3), width / 2, height / 2);
         }
 
         // Calculate how many minutes have passed since 8:00 AM
@@ -70,21 +65,28 @@
 
         // Initialize the dots array, one dot per minute
         function initializeDots() {
-            let cols = Math.floor(width / 30);
-            let rows = Math.floor(height / 30);
+            let cols = Math.floor(width / 20);  // Make the dots smaller
+            let rows = Math.floor(height / 20);
             let totalDots = cols * rows;
 
             for (let i = 0; i < totalDots; i++) {
-                let x = (i % cols) * 30 + 15;
-                let y = Math.floor(i / cols) * 30 + 15;
+                let x = (i % cols) * 20 + 10;  // Adjust positions for smaller dots
+                let y = Math.floor(i / cols) * 20 + 10;
                 dots.push(new Dot(x, y));
             }
         }
 
-        // Remove one dot every minute
-        function removeDot() {
-            if (dots.length > 0) {
-                dots.shift();  // Remove the first dot from the array
+        // Handle the disappearance of a dot and flashing effect
+        function handleDotDisappearance() {
+            if (nextDotToDisappear < dots.length) {
+                // Flash the next dot for the last 60 seconds before it disappears
+                if (nextDotToDisappear === dots.length - 60) {
+                    flashingDotIndex = nextDotToDisappear;
+                }
+
+                // Remove the first dot in the array every minute
+                dots.shift();
+                nextDotToDisappear++;
             }
         }
 
@@ -93,16 +95,21 @@
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.size = 20;
+                this.size = 10;  // Make the dots smaller
             }
 
-            display() {
+            display(index) {
                 noStroke();
-                fill(255);
+                if (index === flashingDotIndex) {
+                    // Flashing effect for the dot that is about to disappear
+                    let alpha = (frameCount % 60 < 30) ? 255 : 0;  // Flash between visible and invisible
+                    fill(0, alpha);  // Black color with flashing effect
+                } else {
+                    fill(0);  // Normal black dot
+                }
                 ellipse(this.x, this.y, this.size, this.size);
             }
         }
     </script>
 </body>
 </html>
-
