@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown to 4:30 PM</title>
+    
+    <!-- Link to p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    
+    <style>
+        body {
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let startTime;
+        let duration;
+        let dots = [];
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);  // Create the canvas to draw on
+            calculateCountdown();  // Set the initial countdown target (4:30 PM)
+        }
+
+        function draw() {
+            background(0);  // Clear the background each frame
+
+            let elapsed = (millis() - startTime) / 1000;  // Convert to seconds
+            let remainingTime = duration - elapsed;
+
+            // If the countdown is over, recalculate to the next 4:30 PM
+            if (remainingTime <= 0) {
+                calculateCountdown();  // Reset the countdown 
