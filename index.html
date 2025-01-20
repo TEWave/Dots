@@ -11,29 +11,29 @@
     <style>
         body {
             background-color: black;
+            margin: 0;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
         }
     </style>
 </head>
 <body>
     <script>
-        let startTime;
+        let targetTime;
         let duration;
         let dots = [];
+        let startTime;
 
+        // Setup function: runs once at the beginning
         function setup() {
             createCanvas(windowWidth, windowHeight);  // Create the canvas to draw on
             calculateCountdown();  // Set the initial countdown target (4:30 PM)
         }
 
+        // Draw function: runs repeatedly (every frame)
         function draw() {
             background(0);  // Clear the background each frame
 
@@ -42,4 +42,33 @@
 
             // If the countdown is over, recalculate to the next 4:30 PM
             if (remainingTime <= 0) {
-                calculateCountdown();  // Reset the countdown 
+                calculateCountdown();  // Reset the countdown for the next 4:30 PM
+                remainingTime = duration;  // Reset to the full duration
+            }
+
+            // Create a new dot every second (60 FPS)
+            if (remainingTime > 0 && frameCount % 60 === 0) {
+                dots.push(new Dot(random(width), random(height)));  // Add a new dot
+            }
+
+            // Update and display all dots
+            for (let i = dots.length - 1; i >= 0; i--) {
+                dots[i].update();
+                dots[i].display();
+                if (dots[i].alpha <= 0) {
+                    dots.splice(i, 1);  // Remove dot when it has faded out
+                }
+            }
+
+            // Display the countdown timer (in the center)
+            textSize(48);
+            fill(255);
+            textAlign(CENTER, CENTER);
+            text(nf(floor(remainingTime), 2), width / 2, height / 2);  // Show remaining time
+        }
+
+        // Dot class to create each dot with behavior (movement, fading)
+        class Dot {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
