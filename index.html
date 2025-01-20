@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown to 4:30 PM</title>
+    <title>Form REYT with Dots</title>
     
     <!-- Link to p5.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
@@ -26,12 +26,28 @@
         const totalMinutes = 510;  // 8:00 AM to 4:30 PM is 510 minutes
         let startTime;
         let lastTimeChecked;
-        let nextDotToDisappear = 0;  // Index of the next dot to disappear
-        let flashingDotIndex = -1;  // Track which dot is currently flashing
+        const letterCoordinates = {
+            R: [
+                {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 3},
+                {x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 3, y: 1}
+            ],
+            E: [
+                {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 3},
+                {x: 2, y: 3}, {x: 2, y: 2}, {x: 2, y: 1}, {x: 2, y: 0}, {x: 3, y: 0}
+            ],
+            Y: [
+                {x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 1}, {x: 1, y: 2}, {x: 0, y: 3}
+            ],
+            T: [
+                {x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}, {x: 1, y: 1}, {x: 1, y: 2}
+            ]
+        };
+
+        let allCoordinates = [];
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
-            initializeDots();
+            allCoordinates = generateCoordinates();
             startTime = millis();
             lastTimeChecked = getElapsedMinutes();
         }
@@ -41,15 +57,15 @@
 
             let currentMinute = getElapsedMinutes();
             
-            // If a minute has passed, remove a dot and handle flashing
+            // If a minute has passed, add a new dot
             if (currentMinute > lastTimeChecked) {
                 lastTimeChecked = currentMinute;
-                handleDotDisappearance();
+                addDot();
             }
 
             // Display all dots
             for (let i = 0; i < dots.length; i++) {
-                dots[i].display(i);
+                dots[i].display();
             }
         }
 
@@ -63,30 +79,36 @@
             return Math.floor(elapsedMillis / 60000);  // Convert to minutes
         }
 
-        // Initialize the dots array, one dot per minute
-        function initializeDots() {
-            const cols = Math.floor(Math.sqrt(totalMinutes)); // Number of columns based on sqrt(total dots)
-            const rows = Math.ceil(totalMinutes / cols); // Number of rows to fit all dots
-            const spacing = Math.min(width / cols, height / rows); // Adjust spacing based on screen size
+        // Generate the coordinates to form the word "REYT"
+        function generateCoordinates() {
+            let coords = [];
+            let gridSize = 30;  // Spacing between dots
 
-            for (let i = 0; i < totalMinutes; i++) {
-                let x = (i % cols) * spacing + spacing / 2;
-                let y = Math.floor(i / cols) * spacing + spacing / 2;
-                dots.push(new Dot(x, y));
-            }
-        }
+            // Adjust the x and y coordinates to place the letters on the screen
+            let xOffset = 150;
+            let yOffset = 100;
 
-        // Handle the disappearance of a dot and flashing effect
-        function handleDotDisappearance() {
-            if (nextDotToDisappear < dots.length) {
-                // Flash the next dot for the last 60 seconds before it disappears
-                if (nextDotToDisappear === dots.length - 60) {
-                    flashingDotIndex = nextDotToDisappear;
+            // Add each letter's coordinates to the final list
+            for (let letter in letterCoordinates) {
+                let letterCoords = letterCoordinates[letter];
+                for (let i = 0; i < letterCoords.length; i++) {
+                    let x = xOffset + letterCoords[i].x * gridSize;
+                    let y = yOffset + letterCoords[i].y * gridSize;
+                    coords.push({x: x, y: y});
                 }
 
-                // Remove the first dot in the array every minute
-                dots.shift();
-                nextDotToDisappear++;
+                // Increase xOffset to space out letters
+                xOffset += 150;
+            }
+
+            return coords;
+        }
+
+        // Add a new dot according to the coordinates
+        function addDot() {
+            if (dots.length < allCoordinates.length) {
+                let newDot = new Dot(allCoordinates[dots.length].x, allCoordinates[dots.length].y);
+                dots.push(newDot);
             }
         }
 
@@ -98,15 +120,9 @@
                 this.size = 10;  // Make the dots smaller
             }
 
-            display(index) {
+            display() {
                 noStroke();
-                if (index === flashingDotIndex) {
-                    // Flashing effect for the dot that is about to disappear
-                    let alpha = (frameCount % 60 < 30) ? 255 : 0;  // Flash between visible and invisible
-                    fill(0, alpha);  // Black color with flashing effect
-                } else {
-                    fill(0);  // Normal black dot
-                }
+                fill(0);  // Black color for the dots
                 ellipse(this.x, this.y, this.size, this.size);
             }
         }
