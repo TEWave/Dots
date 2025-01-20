@@ -25,16 +25,14 @@
         let dots = [];
         const totalMinutes = 510;  // 8:00 AM to 4:30 PM is 510 minutes
         const startHour = 8;
-        const endHour = 16;  // 4:30 PM
-        const endMinute = 30;
         const letterCoordinates = {
             R: [
-                {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 3},
-                {x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 3, y: 1}
+                {x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 0, y: 1},
+                {x: 0, y: 2}, {x: 1, y: 2}, {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 2}
             ],
             E: [
-                {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 3},
-                {x: 2, y: 3}, {x: 2, y: 2}, {x: 2, y: 1}, {x: 2, y: 0}, {x: 3, y: 0}
+                {x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 1, y: 0},
+                {x: 2, y: 0}, {x: 2, y: 1}, {x: 2, y: 2}, {x: 2, y: 3}, {x: 3, y: 0}
             ],
             Y: [
                 {x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 1}, {x: 1, y: 2}, {x: 0, y: 3}
@@ -49,43 +47,41 @@
         function setup() {
             createCanvas(windowWidth, windowHeight);
             allCoordinates = generateCoordinates();
-            frameRate(60);  // Make sure the drawing updates 60 times per second
+            frameRate(60);  // Update screen at 60 frames per second
         }
 
         function draw() {
             let currentMinute = getElapsedMinutes();
             
-            // If a minute has passed, add a new dot
+            // Add a new dot for each minute that has passed since 8:00 AM
             if (currentMinute <= totalMinutes) {
                 addDot(currentMinute);
             }
 
-            // Display all dots
+            // Display all the dots
             for (let i = 0; i < dots.length; i++) {
                 dots[i].display();
             }
         }
 
-        // Calculate how many minutes have passed since 8:00 AM
+        // Calculate the number of minutes that have passed since 8:00 AM
         function getElapsedMinutes() {
             let now = new Date();
             let startOfDay = new Date(now);
-            startOfDay.setHours(startHour, 0, 0, 0);  // Set time to 8:00 AM today
+            startOfDay.setHours(startHour, 0, 0, 0);  // Set to 8:00 AM
 
-            let elapsedMillis = now - startOfDay;  // Elapsed time in milliseconds
+            let elapsedMillis = now - startOfDay;
             return Math.floor(elapsedMillis / 60000);  // Convert to minutes
         }
 
-        // Generate the coordinates to form the word "REYT"
+        // Generate coordinates for the letters "REYT" using dot-based "font"
         function generateCoordinates() {
             let coords = [];
-            let gridSize = 30;  // Spacing between dots
+            let gridSize = 20;  // Smaller grid size for tighter dots
 
-            // Adjust the x and y coordinates to place the letters on the screen
             let xOffset = 150;
             let yOffset = 100;
 
-            // Add each letter's coordinates to the final list
             for (let letter in letterCoordinates) {
                 let letterCoords = letterCoordinates[letter];
                 for (let i = 0; i < letterCoords.length; i++) {
@@ -94,14 +90,14 @@
                     coords.push({x: x, y: y});
                 }
 
-                // Increase xOffset to space out letters
-                xOffset += 150;
+                // Move the next letter further to the right
+                xOffset += 100;
             }
 
             return coords;
         }
 
-        // Add a new dot according to the current minute
+        // Add a dot each minute based on the current time
         function addDot(currentMinute) {
             if (dots.length < currentMinute) {
                 let newDot = new Dot(allCoordinates[dots.length].x, allCoordinates[dots.length].y);
@@ -109,18 +105,18 @@
             }
         }
 
-        // Dot class to create and display dots
+        // Dot class to handle dot creation and display
         class Dot {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.size = 10;  // Make the dots smaller
+                this.size = 10;  // Set a reasonable size for the dots
             }
 
             display() {
                 noStroke();
-                fill(0);  // Black color for the dots
-                ellipse(this.x, this.y, this.size, this.size);
+                fill(0);  // Black dots
+                ellipse(this.x, this.y, this.size, this.size);  // Draw each dot
             }
         }
     </script>
