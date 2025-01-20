@@ -65,13 +65,13 @@
 
         // Initialize the dots array, one dot per minute
         function initializeDots() {
-            let cols = Math.floor(width / 20);  // Make the dots smaller
-            let rows = Math.floor(height / 20);
-            let totalDots = cols * rows;
+            const cols = Math.floor(Math.sqrt(totalMinutes)); // Number of columns based on sqrt(total dots)
+            const rows = Math.ceil(totalMinutes / cols); // Number of rows to fit all dots
+            const spacing = Math.min(width / cols, height / rows); // Adjust spacing based on screen size
 
-            for (let i = 0; i < totalDots; i++) {
-                let x = (i % cols) * 20 + 10;  // Adjust positions for smaller dots
-                let y = Math.floor(i / cols) * 20 + 10;
+            for (let i = 0; i < totalMinutes; i++) {
+                let x = (i % cols) * spacing + spacing / 2;
+                let y = Math.floor(i / cols) * spacing + spacing / 2;
                 dots.push(new Dot(x, y));
             }
         }
